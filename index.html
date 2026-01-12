@@ -151,7 +151,6 @@
 <body>
   <div class="wrap">
     <div class="stage">
-      <div class="hud" id="hud"></div>
       <canvas id="c" width="760" height="520" aria-label="Simulación Tierra-Luna"></canvas>
     </div>
 
@@ -164,18 +163,18 @@
 
       <div class="control">
         <div class="top">
-          <div class="label">Período de traslación (órbita)</div>
-          <div class="value"><span id="orbVal"></span> s/vuelta</div>
+          <div class="label">Velocidad de traslación (órbita)</div>
+          <div class="value"><span id="orbVal"></span> vueltas/s</div>
         </div>
-        <input id="orb" type="range" min="2" max="30" step="0.1" value="10" />
+        <input id="orb" type="range" min="0.02" max="0.30" step="0.01" value="0.10" />
       </div>
 
       <div class="control">
         <div class="top">
-          <div class="label">Período de rotación (spin)</div>
-          <div class="value"><span id="spinVal"></span> s/vuelta</div>
+          <div class="label">Velocidad de rotación (spin)</div>
+          <div class="value"><span id="spinVal"></span> vueltas/s</div>
         </div>
-        <input id="spin" type="range" min="2" max="30" step="0.1" value="10" />
+        <input id="spin" type="range" min="0.02" max="0.30" step="0.01" value="0.10" />
       </div>
 
       <div class="row">
@@ -203,7 +202,6 @@
   const canvas = document.getElementById("c");
   const ctx = canvas.getContext("2d");
 
-  const hud = document.getElementById("hud");
   const orb = document.getElementById("orb");
   const spin = document.getElementById("spin");
   const orbVal = document.getElementById("orbVal");
@@ -219,9 +217,9 @@
   const W = canvas.width, H = canvas.height;
   const center = { x: W * 0.50, y: H * 0.50 };
 
-  const earthR = 46;
-  const moonR  = 18;
-  const orbitR = 170;
+  const earthR = 75;
+  const moonR  = 30;
+  const orbitR = 210;
 
   // Estado físico (ángulos)
   let thetaOrbit = 0;  // ángulo orbital (rad)
@@ -239,12 +237,6 @@
     const Torb = parseFloat(orb.value);
     const Tspin = parseFloat(spin.value);
     const ratio = Tspin / Torb;
-
-    hud.innerHTML =
-      `<div><b>Traslación</b> (T): ${fmt(Torb)} s/vuelta</div>` +
-      `<div><b>Rotación</b> (T): ${fmt(Tspin)} s/vuelta</div>` +
-      `<div>Relación Trot/Ttras: <b>${ratio.toFixed(3)}</b></div>` +
-      `<div style="opacity:.85;margin-top:6px">Condición de bloqueo: <b>Trot = Ttras</b></div>`;
   }
 
   function drawStars(){
@@ -354,12 +346,13 @@
     last = now;
 
     if(!paused){
-      const Torb = parseFloat(orb.value);
-      const Tspin = parseFloat(spin.value);
+      const vOrbit = parseFloat(orb.value);   // vueltas por segundo
+      const vSpin  = parseFloat(spin.value);  // vueltas por segundo
 
-      // Velocidades angulares: ω = 2π/T
-      const wOrbit = (2*Math.PI) / Torb;
-      const wSpin  = (2*Math.PI) / Tspin;
+      // Velocidades angulares: ω = 2π * (vueltas/seg)
+      const wOrbit = (2*Math.PI) * vOrbit;
+      const wSpin  = (2*Math.PI) * vSpin;
+
 
       thetaOrbit += wOrbit * dt;
 
